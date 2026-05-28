@@ -1,0 +1,328 @@
+
+
+
+
+
+
+
+
+
+
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAILY COSTING | Hotel Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #1e3a4f;
+            --accent: #2c6e4f;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container { max-width: 1600px; margin: 0 auto; }
+
+        .nav {
+            display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 28px;
+        }
+        .nav a {
+            padding: 12px 24px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0;
+            border-radius: 50px; color: #334155; text-decoration: none; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: all 0.25s;
+        }
+        .nav a:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+
+        h1 {
+            text-align: center; font-size: 2.1rem; font-weight: 700;
+            background: linear-gradient(135deg, #1e3a4f, #2c6e4f);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .top-form {
+            background: white; border-radius: 20px; padding: 20px 28px;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.1); border: 1px solid #f1f5f9;
+            display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px;
+        }
+        .top-form > div { flex: 1; min-width: 180px; }
+        .top-form label { font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+        .top-form input, .top-form select {
+            width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0;
+            border-radius: 12px; font-size: 1rem;
+        }
+        .top-form input:focus, .top-form select:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 4px rgba(44,110,79,0.15);
+        }
+
+        .table-wrapper {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 15px 35px -15px rgba(0,0,0,0.12); margin-bottom: 24px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th {
+            background: var(--primary); color: white; padding: 16px 10px;
+            font-weight: 600; text-transform: uppercase; font-size: 0.78rem;
+            position: sticky; top: 0; z-index: 10;
+        }
+        td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+
+        input[type="number"] {
+            width: 85px; padding: 8px 10px; text-align: center;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,110,79,0.2);
+        }
+
+        .product-name { font-weight: 600; text-align: left !important; }
+        .revenue { color: var(--success); font-weight: 600; }
+        .cost { color: #f97316; font-weight: 600; }
+        .profit { color: #15803d; font-weight: 600; }
+
+        .total-box {
+            background: white; border-radius: 20px; padding: 24px 28px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 20px;
+        }
+
+        .save-btn {
+            background: var(--accent); color: white; border: none;
+            padding: 14px 32px; border-radius: 50px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+        }
+        .save-btn:hover { transform: translateY(-3px); }
+
+        footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 0.8rem; }
+
+        @media (max-width: 960px) {
+            body { padding: 12px; }
+            input[type="number"] { width: 68px; }
+            .top-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="nav">
+        <a href="{% url 'daily_costing' %}"><i class="fas fa-chart-line"></i> Daily Costing</a>
+        <a href="{% url 'saved_costings' %}"><i class="fas fa-archive"></i> Saved Costings</a>
+        <a href="{% url 'summary_report' %}"><i class="fas fa-chart-pie"></i> Summary Report</a>
+    </div>
+
+
+
+    <h1><i class="fas fa-coins"></i> Daily Hotel Costing</h1>
+
+    <form method="POST" id="costingForm">
+        {% csrf_token %}
+
+        <div class="top-form">
+            <div>
+                <label><i class="far fa-calendar-alt"></i> Date</label>
+                <input type="date" name="date" id="costDate" required>
+            </div>
+            <div>
+                <label><i class="fas fa-store"></i> Outlet</label>
+                <select name="outlet" required>
+                    <option value="">— Select Outlet —</option>
+                    {% for outlet in outlets %}
+                    <option value="{{ outlet.id }}">{{ outlet.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="costTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Sales Price (₦)</th>
+                        <th>Rate (₦)</th>
+                        <th>Opening</th>
+                        <th>Req</th>
+                        <th>Total Stock</th>
+                        <th>Comp</th>
+                        <th>Comp Bfast</th>
+                        <th>Closing</th>
+                        <th>Sales (Qty)</th>
+                        <th>Revenue (₦)</th>
+                        <th>Cost (₦)</th>
+                        <th>Gross Profit (₦)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr data-product-id="{{ product.id }}">
+                        <td class="product-name">{{ product.name }}</td>
+                        <td class="price" data-val="{{ product.sales_price }}">{{ product.sales_price }}</td>
+                        <td class="rate" data-val="{{ product.rate }}">{{ product.rate }}</td>
+                        <td><input type="number" class="opening" name="opening_{{ product.id }}" value="0" step="any"></td>
+                        <td><input type="number" class="req" name="req_{{ product.id }}" value="0" step="any"></td>
+                        <td class="total-stock">0</td>
+                        <td><input type="number" class="comp" name="comp_{{ product.id }}" value="0" step="any"></td>
+                        <td><input type="number" class="comp_bfast" name="comp_bfast_{{ product.id }}" value="0" step="any"></td>
+                        <td><input type="number" class="closing" name="closing_{{ product.id }}" value="0" step="any"></td>
+                        <td class="sales">0</td>
+                        <td class="revenue">0</td>
+                        <td class="cost">0</td>
+                        <td class="profit">0</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="total-box">
+            <div id="grandTotal">
+                Revenue: ₦0<br>
+                Cost: ₦0<br>
+                Gross Profit: ₦0<br>
+                Ratio: 0.00%
+            </div>
+            <button type="submit" class="save-btn">
+                <i class="fas fa-save"></i> Save Costing
+            </button>
+        </div>
+    </form>
+
+    <footer><i class="fas fa-bolt"></i> Real-time calculations by dreezzy</footer>
+</div>
+
+<script>
+    const table = document.getElementById('costTable');
+    const grandTotalEl = document.getElementById('grandTotal');
+
+    function computeRow(row) {
+        const opening = parseFloat(row.querySelector('.opening').value) || 0;
+        const req     = parseFloat(row.querySelector('.req').value) || 0;
+        const comp    = parseFloat(row.querySelector('.comp').value) || 0;
+        const compBfast = parseFloat(row.querySelector('.comp_bfast').value) || 0;
+        const closing = parseFloat(row.querySelector('.closing').value) || 0;
+
+        const price = parseFloat(row.querySelector('.price').dataset.val) || 0;
+        const rate  = parseFloat(row.querySelector('.rate').dataset.val) || 0;
+
+        const totalStock = opening + req;
+        let sales = Math.max(0, totalStock - comp - compBfast - closing);
+
+        const revenue = sales * price;
+        const cost    = sales * rate;
+        const profit  = revenue - cost;
+
+        row.querySelector('.total-stock').textContent = totalStock.toFixed(2);
+        row.querySelector('.sales').textContent = sales.toFixed(2);
+        row.querySelector('.revenue').textContent = revenue.toFixed(2);
+        row.querySelector('.cost').textContent = cost.toFixed(2);
+        row.querySelector('.profit').textContent = profit.toFixed(2);
+
+        return { revenue, cost, profit };
+    }
+
+    function updateGrandTotal() {
+        let totalRev = 0, totalCost = 0, totalProfit = 0;
+
+        document.querySelectorAll('#costTable tbody tr').forEach(row => {
+            const rev = parseFloat(row.querySelector('.revenue').textContent) || 0;
+            const cost = parseFloat(row.querySelector('.cost').textContent) || 0;
+            const profit = parseFloat(row.querySelector('.profit').textContent) || 0;
+
+            totalRev += rev;
+            totalCost += cost;
+            totalProfit += profit;
+        });
+
+        const ratio = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0;
+
+        grandTotalEl.innerHTML = `
+            Revenue: ₦${totalRev.toFixed(2)}<br>
+            Cost: ₦${totalCost.toFixed(2)}<br>
+            Gross Profit: ₦${totalProfit.toFixed(2)}<br>
+            Ratio: ${ratio.toFixed(2)}%
+        `;
+    }
+
+    // Event Delegation
+    table.addEventListener('input', (e) => {
+        if (e.target.tagName === 'INPUT') {
+            const row = e.target.closest('tr');
+            if (row) {
+                computeRow(row);
+                updateGrandTotal();
+            }
+        }
+    });
+
+    // Initialize
+    document.querySelectorAll('#costTable tbody tr').forEach(row => computeRow(row));
+    updateGrandTotal();
+
+    // Default date
+    const dateInput = document.getElementById('costDate');
+    if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
+</script>
+
+
+<script>
+// ... your existing script ...
+
+    // Form Validation Before Submit
+    const form = document.getElementById('costingForm');
+    const saveBtn = document.getElementById('saveBtn');
+
+    form.addEventListener('submit', function(e) {
+        let hasInput = false;
+
+        // Check if any input field has value greater than 0
+        const inputs = document.querySelectorAll('#costTable input[type="number"]');
+        
+        inputs.forEach(input => {
+            if (parseFloat(input.value) > 0) {
+                hasInput = true;
+            }
+        });
+
+        if (!hasInput) {
+            e.preventDefault(); // Stop form submission
+            alert("⚠️ No input detected!\n\nPlease enter at least one value (Opening, Req, Comp, etc.) before saving.");
+            
+            // Optional: Highlight all input fields
+            inputs.forEach(input => {
+                input.style.borderColor = '#ef4444';
+                setTimeout(() => {
+                    input.style.borderColor = '#e2e8f0';
+                }, 2000);
+            });
+        }
+    });
+</script>
+
+
+</body>
+</html>
+
+{% endblock %}

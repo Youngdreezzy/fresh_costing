@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Hotel Costing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-container {
+            background: white;
+            padding: 45px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3a4f;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #2c6e4f;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(44, 110, 79, 0.15);
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #2c6e4f;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #1f543b;
+            transform: translateY(-2px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-container">
+    <h2>Create Your Account</h2>
+    <p class="subtitle">Join to start managing hotel daily costing</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: {% if message.tags == 'error' %}#ef4444{% else %}#10b981{% endif %}; text-align:center; margin-bottom:15px;">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Username</label>
+            {{ form.username }}
+            <small class="help-text">Choose a unique username (letters, numbers, and @/./+/-/_ only)</small>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            {{ form.password1 }}
+            <small class="help-text">Must be at least 8 characters. Avoid common words.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            {{ form.password2 }}
+        </div>
+
+        <button type="submit">
+            <i class="fas fa-user-plus"></i> Create Account
+        </button>
+    </form>
+
+    <div class="login-link">
+        Already have an account? 
+        <a href="{% url 'login' %}" style="color:#2c6e4f; font-weight:600;">Login here</a>
+    </div>
+</div>
+
+</body>
+</html>

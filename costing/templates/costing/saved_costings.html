@@ -1,0 +1,378 @@
+
+
+
+
+
+
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAVED COSTINGS | Archive</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #1e3a4f;
+            --accent: #2c6e4f;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .nav a {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            color: #334155;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .nav a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3a4f, #2c6e4f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 24px;
+        }
+
+        /* Search & Stats */
+        .search-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 28px;
+            box-shadow: 0 10px 25px -10px rgba(0,0,0,0.1);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+
+        .search-group input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 20px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+        }
+
+        .search-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(44,110,79,0.15);
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -5px rgba(44,110,79,0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .stats-badge {
+            background: #f8fafc;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        /* Table */
+        .table-wrapper {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px -15px rgba(0,0,0,0.12);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 16px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 12px;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .outlet-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .product-name {
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 70px 20px;
+            color: #64748b;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 10px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .pagination a:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .pagination .current {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #64748b;
+            font-size: 0.82rem;
+        }
+
+        @media (max-width: 860px) {
+            body { padding: 12px; }
+            .search-group { flex-direction: column; }
+            .search-group input { min-width: auto; }
+            th, td { padding: 12px 8px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="nav">
+        <a href="{% url 'daily_costing' %}"><i class="fas fa-chart-line"></i> Daily Costing</a>
+        <a href="{% url 'saved_costings' %}" class="active"><i class="fas fa-archive"></i> Saved Costings</a>
+        <a href="{% url 'summary_report' %}"><i class="fas fa-chart-pie"></i> Summary Report</a>
+    </div>
+
+    <h1><i class="fas fa-archive"></i> Saved Costings Archive</h1>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <form method="GET" style="flex: 1;">
+            <div class="search-group">
+                <input type="text" name="product" placeholder="Search by product name..." 
+                       value="{{ search_product }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                {% if search_product %}
+                    <a href="{% url 'saved_costings' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+        <div class="stats-badge">
+            <i class="fas fa-database"></i> {{ paginator.count }} Total Records
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Outlet</th>
+                    <th>Product</th>
+                    <th>Opening</th>
+                    <th>Req</th>
+                    <th>Comp</th>
+                    <th>Comp Bfast</th>
+                    <th>Closing</th>
+                    <th>User</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for costing in costings %}
+                <tr>
+                    <td><strong>{{ costing.date|date:"Y-m-d" }}</strong></td>
+                    <td><span class="outlet-badge">{{ costing.outlet.name }}</span></td>
+                    <td class="product-name">{{ costing.product.name }}</td>
+                    <td>{{ costing.opening_stock }}</td>
+                    <td>{{ costing.requisition }}</td>
+                    <td>{{ costing.complimentary }}</td>
+                    <td>{{ costing.complimentary_bfast|default:"0" }}</td>
+                    <td>{{ costing.closing_stock }}</td>
+                    <td><strong>{{ costing.user.username }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-box-open fa-3x" style="opacity:0.3; margin-bottom:16px;"></i><br>
+                        {% if search_product %}
+                            No results found for "<strong>{{ search_product }}</strong>"
+                        {% else %}
+                            No saved costings yet.<br>
+                            <small>Start creating daily costings to see them here.</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if costings.has_other_pages %}
+    <div class="pagination">
+        {% if costings.has_previous %}
+            <a href="?page=1{% if search_product %}&product={{ search_product }}{% endif %}">First</a>
+            <a href="?page={{ costings.previous_page_number }}{% if search_product %}&product={{ search_product }}{% endif %}">Previous</a>
+        {% else %}
+            <span style="opacity:0.5;">First</span>
+            <span style="opacity:0.5;">Previous</span>
+        {% endif %}
+
+        <span class="current">Page {{ costings.number }} of {{ paginator.num_pages }}</span>
+
+        {% if costings.has_next %}
+            <a href="?page={{ costings.next_page_number }}{% if search_product %}&product={{ search_product }}{% endif %}">Next</a>
+            <a href="?page={{ paginator.num_pages }}{% if search_product %}&product={{ search_product }}{% endif %}">Last</a>
+        {% else %}
+            <span style="opacity:0.5;">Next</span>
+            <span style="opacity:0.5;">Last</span>
+        {% endif %}
+    </div>
+    <div style="text-align:center; margin-top:12px; color:#64748b; font-size:0.85rem;">
+        Showing {{ costings.start_index }} - {{ costings.end_index }} of {{ paginator.count }}
+    </div>
+    {% endif %}
+
+    <footer>
+        <i class="fas fa-bolt"></i> Saved Costings Archive by dreezzy
+    </footer>
+</div>
+
+</body>
+</html>
+
+{% endblock %}

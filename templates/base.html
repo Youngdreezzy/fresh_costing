@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hotel Costing{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        .navbar {
+            background: #1e3a4f;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-links a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ==================== IMPROVED MESSAGES ==================== */
+        .messages-container {
+            position: fixed;
+            top: 85px;
+            right: 25px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.4s ease forwards;
+            opacity: 1;
+        }
+
+        .message.success { background: #10b981; }
+        .message.error { background: #ef4444; }
+        .message.warning { background: #f59e0b; }
+        .message.info { background: #3b82f6; }
+
+        @keyframes slideIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Auto dismiss animation */
+        .message {
+            animation: slideIn 0.4s ease, fadeOut 0.5s 3.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div>
+            <a href="{% url 'home' %}" style="color:white; text-decoration:none; font-weight:700; font-size:1.2rem;">
+                <i class="fas fa-hotel"></i> Hotel Costing
+            </a>
+        </div>
+
+
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                <span><i class="fas fa-user"></i> {{ user.username }}</span>
+                <a href="{% url 'logout' %}" style="color:#f87171; font-weight:500;">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" style="color:white;">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Messages Container -->
+    <div class="messages-container" id="messages-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message 
+                    {% if message.tags == 'success' %}success
+                    {% elif message.tags == 'error' %}error
+                    {% elif message.tags == 'warning' %}warning
+                    {% else %}info{% endif %}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle
+                        {% elif message.tags == 'error' %}exclamation-circle
+                        {% elif message.tags == 'warning' %}exclamation-triangle
+                        {% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        // Remove messages after animation completes
+        setTimeout(() => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 800);
+            });
+        }, 4000);
+    </script>
+</body>
+</html>
