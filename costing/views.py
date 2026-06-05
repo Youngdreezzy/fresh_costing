@@ -4,6 +4,8 @@ from .models import DailyCosting, Outlet
 from django.contrib import messages
 from django.db.models import Sum, F
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 
 
@@ -86,9 +88,6 @@ def daily_costing(request):
 
 
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render
-from django.db.models import Q
 
 @login_required(login_url='login')
 def saved_costings(request):
@@ -126,6 +125,8 @@ def saved_costings(request):
     return render(request, 'costing/saved_costings.html', context)
 
 from collections import defaultdict
+import csv
+from django.http import HttpResponse
 
 
 @login_required(login_url='login')
@@ -228,6 +229,106 @@ def summary_report(request):
     }
 
     return render(request, 'costing/summary_report.html', context)
+
+
+
+import datetime
+
+
+@login_required(login_url='login')
+def export_summary_csv(request):
+
+    costings = DailyCosting.objects.select_related(
+        'outlet',
+        'product',
+        'user'
+    ).all()
+
+    selected_outlet = request.GET.get('outlet')
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+
+    if from_date and to_date:
+        costings = costings.filter(date__range=[from_date, to_date])
+    elif from_date:
+        costings = costings.filter(date__gte=from_date)
+    elif to_date:
+        costings = costings.filter(date__lte=to_date)
+
+    if selected_outlet:
+        costings = costings.filter(outlet_id=selected_outlet)
+
+    grouped_data = {}
+
+    for costing in costings:
+
+        key = (costing.date, costing.outlet.name)
+
+        if key not in grouped_data:
+            grouped_data[key] = {
+                'opening_stock_value': 0,
+                'closing_stock_value': 0,
+                'revenue': 0,
+                'cost': 0,
+                'profit': 0,
+            }
+
+        rate = costing.product.rate
+
+        grouped_data[key]['opening_stock_value'] += (
+            costing.opening_stock * rate
+        )
+
+        grouped_data[key]['closing_stock_value'] += (
+            costing.closing_stock * rate
+        )
+
+        grouped_data[key]['revenue'] += costing.revenue()
+        grouped_data[key]['cost'] += costing.cost_of_production()
+        grouped_data[key]['profit'] += costing.gross_profit()
+
+    response = HttpResponse(content_type='text/csv')
+
+    response['Content-Disposition'] = (
+        f'attachment; filename="summary_report_{datetime.date.today()}.csv"'
+    )
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        'Date',
+        'Outlet',
+        'Opening Value',
+        'Closing Value',
+        'Revenue',
+        'Cost',
+        'Gross Profit',
+        'Ratio (%)'
+    ])
+
+    for (date, outlet), data in grouped_data.items():
+
+        ratio = 0
+
+        if data['revenue'] > 0:
+            ratio = (data['profit'] / data['revenue']) * 100
+
+        writer.writerow([
+            date,
+            outlet,
+            round(data['opening_stock_value'], 2),
+            round(data['closing_stock_value'], 2),
+            round(data['revenue'], 2),
+            round(data['cost'], 2),
+            round(data['profit'], 2),
+            round(ratio, 2),
+        ])
+
+    return response
+
+
+
+
 
 
 

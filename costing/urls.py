@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.daily_costing, name='daily_costing'),           # Now accessible at /costing/
     path('saved-costings/', views.saved_costings, name='saved_costings'),
     path('summary-report/', views.summary_report, name='summary_report'),
+    path('summary-report/export-csv/',views.export_summary_csv,name='export_summary_csv'),
 ]

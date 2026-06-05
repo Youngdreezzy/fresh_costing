@@ -157,6 +157,24 @@
         </form>
     </div>
 
+
+    <div style="margin-bottom:20px; text-align:right;">
+        <a href="{% url 'export_summary_csv' %}?{{ request.GET.urlencode }}"
+            style="
+            display:inline-block;
+            background:#10b981;
+            color:white;
+            padding:12px 20px;
+            border-radius:12px;
+            text-decoration:none;
+            font-weight:600;
+            ">
+            <i class="fas fa-download"></i>
+            Download CSV
+        </a>
+    </div>
+
+
     <!-- KPI Cards -->
     <div class="kpi-dashboard">
         <div class="kpi-card">
@@ -181,6 +199,11 @@
             <small style="color: #10b981;">Overall Profitability</small>
         </div>
     </div>
+
+
+
+
+
 
     <!-- Report Table -->
     <div class="table-wrapper">
@@ -227,11 +250,15 @@
         </table>
     </div>
 
+
+
+
     <footer>
         <i class="fas fa-bolt"></i> Summary Report by dreezzy• 
         {% if report_data %}{{ report_data|length }} records{% else %}No records{% endif %}
     </footer>
 </div>
+
 
 </body>
 </html>
